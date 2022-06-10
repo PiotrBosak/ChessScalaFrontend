@@ -49,6 +49,15 @@ case class Board private (
       possibleMoves = getMovesForPiece(piece, position)
     } yield possibleMoves
 
+  def possibleValidMoves(position: Position): List[Position] = {
+    val moves = getPossibleMoves(position).getOrElse(Nil)
+    moves
+      .filter { case (moveType, p) =>
+        getBoardAfterMove(moveType, findTile(position), findTile(p)).isDefined
+      }
+      .map(_._2)
+  }
+
   def getMovesForPiece(
       piece: Piece,
       position: Position
@@ -77,8 +86,7 @@ case class Board private (
   def getBoardAfterMove(
       moveType: MoveType,
       tileFrom: Tile,
-      tileTo: Tile,
-      board: Board
+      tileTo: Tile
   ): Option[Board] =
     tileFrom.currentPiece
       .map { piece =>
@@ -86,7 +94,7 @@ case class Board private (
           piece,
           moveType match
             case Castling  => makeCastlingMove(tileFrom, tileTo)
-            case LePassant => makeLePassant(tileFrom, tileTo, piece, board)
+            case LePassant => makeLePassant(tileFrom, tileTo, piece, this)
             case _         => makeNormalMove(tileFrom, tileTo, piece)
         )
       }

@@ -1,12 +1,29 @@
 package chesslogic.board
 
 import io.circe.syntax.*
+import math.Ordered.orderingToOrdered
+import scala.math.Ordering
 import cats.derived.semiauto.*
-import chesslogic.board.Rank.{ Eight, Five, Four, One, Seven, Six, Three, Two }
+import chesslogic.board.Rank.{Eight, Five, Four, One, Seven, Six, Three, Two}
 import io.circe.Codec
+import cats.kernel.{Eq, Order}
+
+import scala.collection.SeqView.Sorted
+import scala.math.Ordering
 import scala.util.Try
 
 final case class Position(file: File, rank: Rank) derives Codec.AsObject
+
+object Position:
+  given Ordering[Position] =
+    (x: Position, y: Position) => {
+      import File.*
+      import Rank.*
+      val compareRank = x.rank.compare(y.rank)
+      if (compareRank != 0)
+        compareRank
+      else x.file.compare(y.file)
+    }
 
 enum Rank:
   case One
@@ -28,8 +45,11 @@ enum Rank:
     case Rank.Seven => 7
     case Rank.Eight => 8
 
-  def advanceUnsafe(n: Int): Rank   = Rank.fromIntUnsafe(toNumber + n)
-  def advance(n: Int): Option[Rank] = Try(Rank.fromIntUnsafe(toNumber + n)).toOption
+  def advanceUnsafe(n: Int): Rank = Rank.fromIntUnsafe(toNumber + n)
+  def advance(n: Int): Option[Rank] = Try(
+    Rank.fromIntUnsafe(toNumber + n)
+  ).toOption
+
 end Rank
 
 object Rank:
@@ -43,6 +63,8 @@ object Rank:
     case 7 => Seven
     case 8 => Eight
     case _ => throw new RuntimeException("invalid rank")
+
+  given Ordering[Rank] = (x: Rank, y: Rank) => x.toNumber - y.toNumber
 
 enum File:
   case A
@@ -64,8 +86,10 @@ enum File:
     case File.G => 7
     case File.H => 8
 
-  def advanceUnsafe(n: Int): File   = File.fromIntUnsafe(toNumber + n)
-  def advance(n: Int): Option[File] = Try(File.fromIntUnsafe(toNumber + n)).toOption
+  def advanceUnsafe(n: Int): File = File.fromIntUnsafe(toNumber + n)
+  def advance(n: Int): Option[File] = Try(
+    File.fromIntUnsafe(toNumber + n)
+  ).toOption
 
 end File
 
@@ -81,7 +105,10 @@ object File:
     case 8 => H
     case _ => throw new RuntimeException("invalid file")
 
-final case class Move(from: Position, to: Position, moveType: MoveType) derives Codec.AsObject
+  given Ordering[File] = (x: File, y: File) => x.toNumber - y.toNumber
+
+final case class Move(from: Position, to: Position, moveType: MoveType)
+    derives Codec.AsObject
 enum MoveType:
   case Normal
   case TwoTileMove

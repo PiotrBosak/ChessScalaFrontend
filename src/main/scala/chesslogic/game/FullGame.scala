@@ -32,8 +32,7 @@ case class FullGame(
       newBoard <- currentBoard.getBoardAfterMove(
         moveType,
         tileFrom,
-        tileToMove,
-        currentBoard
+        tileToMove
       ) if isColorCorrect
     } yield FullGame(newBoard :: this.gameHistory, turn = turn.changeTurn)
   }
@@ -49,8 +48,7 @@ case class FullGame(
       newBoard <- currentBoard.getBoardAfterMove(
         moveType,
         tileFrom,
-        tileToMove,
-        currentBoard
+        tileToMove
       )
     } yield FullGame(newBoard :: this.gameHistory, turn = turn.changeTurn)
 
