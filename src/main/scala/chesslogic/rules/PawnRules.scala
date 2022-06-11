@@ -40,7 +40,7 @@ object PawnRules extends MovingRules[Pawn] {
       rightAttackTile <- getRightAttackTile(position, board, piece.color)
       attackedPiece   <- rightAttackTile.currentPiece
       if attackedPiece.color != piece.color
-    } yield (MoveType.Normal, rightAttackTile.position)
+    } yield (MoveType.Attack, rightAttackTile.position)
   private def getRightAttackTile(
       position: Position,
       board: Board,
@@ -122,7 +122,7 @@ object PawnRules extends MovingRules[Pawn] {
       leftAttackTile <- getLeftAttackTile(position, board, piece.color)
       attackedPiece  <- leftAttackTile.currentPiece
       if attackedPiece.color != piece.color
-    } yield (MoveType.Normal, leftAttackTile.position)
+    } yield (MoveType.Attack, leftAttackTile.position)
   private def getLeftAttackTile(
       position: Position,
       board: Board,

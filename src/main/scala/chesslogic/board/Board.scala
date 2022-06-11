@@ -49,13 +49,12 @@ case class Board private (
       possibleMoves = getMovesForPiece(piece, position)
     } yield possibleMoves
 
-  def possibleValidMoves(position: Position): List[Position] = {
+  def possibleValidMoves(position: Position): List[(MoveType,Position)] = {
     val moves = getPossibleMoves(position).getOrElse(Nil)
     moves
       .filter { case (moveType, p) =>
         getBoardAfterMove(moveType, findTile(position), findTile(p)).isDefined
       }
-      .map(_._2)
   }
 
   def getMovesForPiece(

@@ -18,6 +18,6 @@ object KnightRules extends MovingRules[Knight] {
       position: Position,
       board: Board
   ): List[(MoveType, Position)] =
-    getAllMoves(position, board, combinations)._2.map(p => (MoveType.Normal, p))
+    getAllMoves(position, board, combinations)._2.map(p => (MoveType.Attack, p))
 
 }

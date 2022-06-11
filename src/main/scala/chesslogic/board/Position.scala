@@ -110,6 +110,7 @@ object File:
 final case class Move(from: Position, to: Position, moveType: MoveType)
     derives Codec.AsObject
 enum MoveType:
+  case Attack
   case Normal
   case TwoTileMove
   case Castling

@@ -22,7 +22,7 @@ object RookRules extends MovingRules[Rook] {
       getLeftAttack(board, position, piece.color),
       getRightAttack(board, position, piece.color),
       getDownAttack(board, position, piece.color)
-    ).collect { case Some(position) => (MoveType.Normal, position) })
+    ).collect { case Some(position) => (MoveType.Attack, position) })
       .getOrElse(Nil)
 
   override def getPossibleMoves(

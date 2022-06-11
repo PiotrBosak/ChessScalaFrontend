@@ -17,7 +17,7 @@ object BishopRules extends MovingRules[Bishop] {
       getLeftTopAttack(board, position, piece.color),
       getRightDownAttack(board, position, piece.color),
       getLeftDownAttack(board, position, piece.color)
-    ).collect { case Some(position) => (MoveType.Normal, position) }).getOrElse(Nil)
+    ).collect { case Some(position) => (MoveType.Attack, position) }).getOrElse(Nil)
   }
 
   override def getPossibleMoves(position: Position, board: Board): List[(MoveType, Position)] =
