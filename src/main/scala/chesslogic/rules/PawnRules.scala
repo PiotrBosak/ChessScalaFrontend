@@ -4,7 +4,7 @@ import chesslogic.Color
 import chesslogic.Color.*
 import chesslogic.board.Rank.*
 import chesslogic.board.File.*
-import chesslogic.board.{Board, Move, MoveType, Position, Tile}
+import chesslogic.board.{ Board, Move, MoveType, Position, Tile }
 import chesslogic.pieces.Piece.*
 import chesslogic.board.MoveType
 import cats.implicits.*
@@ -65,7 +65,7 @@ object PawnRules extends MovingRules[Pawn] {
       board,
       isLeft = false
     ))
-      .map(p => (MoveType.LePassant, p))
+      .map(p => (MoveType.EnPassant, p))
 
   private def lePassantGet(
       position: Position,

@@ -1,0 +1,14 @@
+.DS_Store
+.bloop/
+.bsp/
+.idea/
+.metals/
+.parcel-cache/
+.sbt-hydra-history
+dist/
+node_modules/
+notes/
+project/
+static/
+target/
+yarn.lock

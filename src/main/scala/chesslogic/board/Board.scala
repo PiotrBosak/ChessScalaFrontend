@@ -2,19 +2,11 @@ package chesslogic.board
 
 import chesslogic.Color
 import chesslogic.pieces.Piece.*
-import chesslogic.rules.{
-  BishopRules,
-  CheckAndMateRules,
-  KingRules,
-  KnightRules,
-  PawnRules,
-  QueenRules,
-  RookRules
-}
+import chesslogic.rules.{ BishopRules, CheckAndMateRules, KingRules, KnightRules, PawnRules, QueenRules, RookRules }
 import cats.derived.semiauto.derived
 import cats.syntax.all.*
 import cats.*
-import io.circe.{Decoder, Encoder, Json, KeyDecoder, KeyEncoder}
+import io.circe.{ Decoder, Encoder, Json, KeyDecoder, KeyEncoder }
 import chesslogic.Color.*
 import File.*
 import Rank.*
@@ -24,7 +16,7 @@ import io.circe.Codec
 
 import scala.util.Try
 //bug, you cannot say .*, you have to list them explicitly
-import chesslogic.utils.orphanInstances.{decodeMap, encodeMap}
+import chesslogic.utils.orphanInstances.{ decodeMap, encodeMap }
 
 case class Board private (
     tiles: Map[Position, Tile],
@@ -39,7 +31,7 @@ case class Board private (
   }
 
   def findTile(position: Position): Tile =
-    tiles.getOrElse(position, throw new RuntimeException(""))
+    tiles.getOrElse(position, throw new RuntimeException("tile is not present, should never happen"))
 
   def getPossibleMoves(position: Position): Option[List[(MoveType, Position)]] =
     for {
@@ -49,7 +41,7 @@ case class Board private (
       possibleMoves = getMovesForPiece(piece, position)
     } yield possibleMoves
 
-  def possibleValidMoves(position: Position): List[(MoveType,Position)] = {
+  def possibleValidMoves(position: Position): List[(MoveType, Position)] = {
     val moves = getPossibleMoves(position).getOrElse(Nil)
     moves
       .filter { case (moveType, p) =>
@@ -86,21 +78,28 @@ case class Board private (
       moveType: MoveType,
       tileFrom: Tile,
       tileTo: Tile
-  ): Option[Board] =
+  ): Option[Board] = {
     tileFrom.currentPiece
       .map { piece =>
         (
           piece,
           moveType match
             case Castling  => makeCastlingMove(tileFrom, tileTo)
-            case LePassant => makeLePassant(tileFrom, tileTo, piece, this)
+            case EnPassant => makeLePassant(tileFrom, tileTo, piece, this)
             case _         => makeNormalMove(tileFrom, tileTo, piece)
         )
       }
-      .filter(tuple =>
-        !CheckAndMateRules.isKingChecked(tuple._2, tuple._1.color)
-      )
+      .filter(tuple => !CheckAndMateRules.isKingChecked(tuple._2, tuple._1.color))
       .map(_._2)
+  }
+
+  def getBoardAfterMove(
+      moveType: MoveType,
+      positionFrom: Position,
+      positionTo: Position
+  ): Option[Board] = {
+    getBoardAfterMove(moveType, getTile(positionFrom), getTile(positionTo))
+  }
 
   private def isLePassant(tileFrom: Tile, tileTo: Tile): Boolean =
     previousMove.exists { previous =>
@@ -126,15 +125,13 @@ case class Board private (
     val attackingColor = tileFrom.currentPiece.get.color
     val difference     = if (attackingColor == White) 1 else -1
     val newTileFrom    = tileFrom.copy(currentPiece = None, hasMoved = true)
-    val newTileTo = tileTo.copy(currentPiece = Some(piece), hasMoved = true)
+    val newTileTo      = tileTo.copy(currentPiece = Some(piece), hasMoved = true)
     val capturedPawntile =
       board.getTile(
-        tileTo.position.copy(rank =
-          Rank.fromIntUnsafe(tileTo.position.rank.toNumber - difference)
-        )
+        tileTo.position.copy(rank = Rank.fromIntUnsafe(tileTo.position.rank.toNumber - difference))
       )
     val newTileAfterCapturing = capturedPawntile.copy(currentPiece = None)
-    val newMove = Move(tileFrom.position, newTileTo.position, LePassant)
+    val newMove               = Move(tileFrom.position, newTileTo.position, EnPassant)
     updateBoard(newTileFrom, newMove)
       .updateBoard(newTileTo, newMove)
       .updateBoard(newTileAfterCapturing, newMove)
@@ -151,7 +148,7 @@ case class Board private (
       tileAfterKing = tileFrom.copy(currentPiece = None)
       kingPiece <- tileFrom.currentPiece
       rookPiece <- oldRookTile.currentPiece
-      newKingTile = tileTo.copy(currentPiece = Some(kingPiece), hasMoved = true)
+      newKingTile     = tileTo.copy(currentPiece = Some(kingPiece), hasMoved = true)
       tileAfterRook   = oldRookTile.copy(currentPiece = None)
       newRookPosition = Position(rookNewFile, tileFrom.position.rank)
       tileForRook     = getTile(newRookPosition)

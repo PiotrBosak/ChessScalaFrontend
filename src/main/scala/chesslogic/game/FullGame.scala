@@ -5,9 +5,9 @@ import chesslogic.Color.*
 import cats.syntax.all.*
 import cats.*
 import cats.derived.semiauto.derived
-import chesslogic.board.{Board, Move, Position}
+import chesslogic.board.{ Board, Move, Position }
 import chesslogic.game.FullGame.Turn
-import chesslogic.game.FullGame.Turn.{BlackTurn, WhiteTurn}
+import chesslogic.game.FullGame.Turn.{ BlackTurn, WhiteTurn }
 import io.circe.Codec
 
 case class FullGame(
@@ -21,8 +21,8 @@ case class FullGame(
     val currentBoard        = gameHistory.head
     val possibleMovesOption = currentBoard.getPossibleMoves(from)
     for {
-      possibleMoves   <- possibleMovesOption
-      (moveType, pos) <- possibleMoves.find(p => p._2 == to)
+      possibleMoves <- possibleMovesOption
+      (moveType, _) <- possibleMoves.find(p => p._2 == to)
       tileToMove = currentBoard.getTile(to)
       tileFrom   = currentBoard.getTile(from)
       attackingPiece <- tileFrom.currentPiece
@@ -41,8 +41,8 @@ case class FullGame(
     val currentBoard        = gameHistory.head
     val possibleMovesOption = currentBoard.getPossibleMoves(from)
     for {
-      possibleMoves   <- possibleMovesOption
-      (moveType, pos) <- possibleMoves.find(p => p._2 == to)
+      possibleMoves <- possibleMovesOption
+      (moveType, _) <- possibleMoves.find(p => p._2 == to)
       tileToMove = currentBoard.getTile(to)
       tileFrom   = currentBoard.getTile(from)
       newBoard <- currentBoard.getBoardAfterMove(

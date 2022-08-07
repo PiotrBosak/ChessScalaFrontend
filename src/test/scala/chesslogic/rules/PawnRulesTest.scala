@@ -4,7 +4,7 @@ import chesslogic.board.File.*
 import chesslogic.board.Position
 import chesslogic.board.Rank.*
 import chesslogic.game.FullGame
-import chesslogic.rules.PawnRules.{getPossibleAttacks, getPossibleMoves}
+import chesslogic.rules.PawnRules.{ getPossibleAttacks, getPossibleMoves }
 import org.scalatest.flatspec.AnyFlatSpec
 
 class PawnRulesTest extends AnyFlatSpec {
@@ -30,9 +30,9 @@ class PawnRulesTest extends AnyFlatSpec {
     val secondPos        = Position(A, Five)
     val thirdPos         = Position(A, Six)
     val fourthPosition   = Position(B, Seven)
-    val afterFirst  = game.makeMoveWithoutTurn(startingPosition, firstPos).get
-    val afterSecond = afterFirst.makeMoveWithoutTurn(firstPos, secondPos).get
-    val afterThird  = afterSecond.makeMoveWithoutTurn(secondPos, thirdPos).get
+    val afterFirst       = game.makeMoveWithoutTurn(startingPosition, firstPos).get
+    val afterSecond      = afterFirst.makeMoveWithoutTurn(firstPos, secondPos).get
+    val afterThird       = afterSecond.makeMoveWithoutTurn(secondPos, thirdPos).get
     assertResult(1)(getPossibleAttacks(thirdPos, afterThird.currentBoard).size)
     val afterFourth =
       afterThird.makeMoveWithoutTurn(thirdPos, fourthPosition).get

@@ -4,9 +4,9 @@ import io.circe.syntax.*
 import math.Ordered.orderingToOrdered
 import scala.math.Ordering
 import cats.derived.semiauto.*
-import chesslogic.board.Rank.{Eight, Five, Four, One, Seven, Six, Three, Two}
+import chesslogic.board.Rank.{ Eight, Five, Four, One, Seven, Six, Three, Two }
 import io.circe.Codec
-import cats.kernel.{Eq, Order}
+import cats.kernel.{ Eq, Order }
 
 import scala.collection.SeqView.Sorted
 import scala.math.Ordering
@@ -107,11 +107,11 @@ object File:
 
   given Ordering[File] = (x: File, y: File) => x.toNumber - y.toNumber
 
-final case class Move(from: Position, to: Position, moveType: MoveType)
-    derives Codec.AsObject
-enum MoveType:
+final case class Move(from: Position, to: Position, moveType: MoveType) derives Codec.AsObject
+enum MoveType {
   case Attack
   case Normal
   case TwoTileMove
   case Castling
-  case LePassant
+  case EnPassant
+}

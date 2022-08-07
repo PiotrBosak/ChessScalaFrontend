@@ -4,6 +4,7 @@ import scala.language.postfixOps
 import sbtwelcome._
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
+ThisBuild / watchBeforeCommand := Watch.clearScreen
 
 lazy val chessfronttyrian =
   (project in file("."))

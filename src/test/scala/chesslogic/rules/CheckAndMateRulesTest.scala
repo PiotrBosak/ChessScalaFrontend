@@ -5,7 +5,7 @@ import chesslogic.board.File.*
 import chesslogic.board.Position
 import chesslogic.board.Rank.*
 import chesslogic.game.FullGame
-import chesslogic.rules.CheckAndMateRules.{isKingChecked, isKingMated}
+import chesslogic.rules.CheckAndMateRules.{ isKingChecked, isKingMated }
 import org.scalatest.flatspec.AnyFlatSpec
 
 class CheckAndMateRulesTest extends AnyFlatSpec {
