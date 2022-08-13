@@ -16,13 +16,11 @@ import myorg.Msg
 import chesslogic.board.MoveType.*
 import myorg.Msg.*
 
-import scala.scalajs.js.annotation.*
 import chesslogic.board.MoveType
 import chesslogic.game.FullGame.Turn
-import myorg.SelectionState.Unselected
+import myorg.SelectionState.*
 
-@JSExportTopLevel("TyrianApp")
-object ChessBoardPage extends TyrianApp[Msg, Model] {
+object ChessBoardPage {
 
   private def initModel: Model = Model(
     SelectionState.Unselected,
@@ -39,26 +37,43 @@ object ChessBoardPage extends TyrianApp[Msg, Model] {
   }
 
   private def updateSelection(model: Model, selectedPosition: Position): (Model, Cmd[IO, Msg]) = {
-    import SelectionState.*
-    model.state match {
-      case Unselected =>
-        val possibleMoves =
-          model.board.possibleValidMoves(selectedPosition)
-        (model.copy(state = Selected(selectedPosition, possibleMoves)), Cmd.None)
-      case Selected(position, possibleMoves) =>
-        if (position == selectedPosition)
+
+    val selectedPiece = model.board.findTile(selectedPosition).currentPiece
+    if (selectedPiece.exists(pieceMatchesTurn(_, model.turn)))
+      model.state match {
+        case Selected(position, _) if position == selectedPosition =>
           (model.copy(state = Unselected), Cmd.None)
-        else
+        case Selected(position, possibleMoves) if !possibleMoves.map(_._2).contains(position) =>
+          val possibleMoves = model.board.possibleValidMoves(selectedPosition)
+          selectNewPosition(model, selectedPosition)
+        case Unselected =>
+          selectNewPosition(model, selectedPosition)
+        case Selected(position, possibleMoves) =>
           makeMove(position, selectedPosition, model, possibleMoves)
+      }
+    else
+      (model, Cmd.SideEffect(IO(println("You can't move like that"))))
+
+  }
+
+  private def pieceMatchesTurn(piece: Piece, turn: Turn): Boolean = {
+    (piece.color, turn) match {
+      case (Color.White, Turn.WhiteTurn) => true
+      case (Color.Black, Turn.BlackTurn) => true
+      case _                             => false
     }
+  }
+
+  private def selectNewPosition(model: Model, selectedPosition: Position) = {
+    val possibleMoves = model.board.possibleValidMoves(selectedPosition)
+    (model.copy(state = Selected(selectedPosition, possibleMoves)), Cmd.None)
   }
 
   private def makeMove(
       currentPosition: Position,
       selectedPosition: Position,
       model: Model,
-      possibleMoves: List[(MoveType, Position)]
-  ): (Model, Cmd[IO, Msg]) = {
+      possibleMoves: List[(MoveType, Position)]): (Model, Cmd[IO, Msg]) = {
     val boardAfterMove =
       possibleMoves
         .find { case (_, position) => selectedPosition == position }
@@ -75,7 +90,11 @@ object ChessBoardPage extends TyrianApp[Msg, Model] {
           Cmd.None
         )
       case None =>
-        (model, Cmd.SideEffect(IO.println("You can't move like that")))
+        val possibleMoves = model.board.possibleValidMoves(selectedPosition)
+        (
+          model.copy(state = Selected(selectedPosition, possibleMoves)),
+          Cmd.None
+        )
     }
   }
 
@@ -103,7 +122,6 @@ object ChessBoardPage extends TyrianApp[Msg, Model] {
       tiles: List[Tile],
       model: Model
   ): List[(Tile, TileType)] = {
-    import SelectionState.*
     val possibleMoves = model.state match {
       case Selected(_, moves) => moves
       case _                  => Nil
@@ -116,7 +134,6 @@ object ChessBoardPage extends TyrianApp[Msg, Model] {
       model: Model,
       possibleMoves: List[(MoveType, Position)]
   ): TileType = {
-    import SelectionState.*
     model.state match {
       case Selected(position, _) if position == tile.position =>
         TileType.Selected
@@ -140,7 +157,6 @@ object ChessBoardPage extends TyrianApp[Msg, Model] {
   private def renderRankAAA(
       tiles: List[(Tile, TileType)]
   ): Html[Msg] = {
-    import SelectionState.*
     tr(tiles.map { case (tile, tileType) =>
       renderTile(tile, tileType)
     })
@@ -159,7 +175,7 @@ object ChessBoardPage extends TyrianApp[Msg, Model] {
       case (_, TileType.PossibleMove) =>
         attribute("style", "background-color: lime")
       case (White, TileType.Normal) =>
-        attribute("style", "background-color: white")
+        attribute("style", "background-color: yellow")
       case (Black, TileType.Normal) =>
         attribute("style", "background-color: black")
     td(
