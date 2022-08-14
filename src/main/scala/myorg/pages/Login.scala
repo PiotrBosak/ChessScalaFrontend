@@ -1,61 +1,66 @@
 package myorg.pages
-import tyrian.*
-import domain.*
-import myorg.algebras.UserAlg
-import tyrian.Html.*
+
 import myorg.misc.Session
-import myorg.Route
-import cats.syntax.all.*
+import tyrian.Cmd
+import tyrian.*
+import tyrian.Html.*
 import cats.data.*
 import cats.data.Validated.*
-import Register.Msg.*
+import cats.syntax.all.*
+import Login.Msg.*
+import myorg.algebras.UserAlg
+import tyrian.Html
 import domain.user.*
-import myorg.pages.Commons.*
+import myorg.Route
+import myorg.pages.Commons.Problem
 import myorg.pages.Commons.Problem.*
 
-object Register {
-
+object Login {
   def update[F[_]: UserAlg](msg: Msg, model: Model): (Model, Cmd[F, Msg]) = {
-    println(msg)
-    msg match
-      case Msg.EnteredUsername(username) => 
+    msg match {
+      case Msg.EnteredUsername(username) =>
         (model.copy(form = model.form.copy(username = username)), Cmd.None)
-      case Msg.EnteredEmail(email)       => 
-        (model.copy(form = model.form.copy(email = email)), Cmd.None)
-      case NoOp                          => (model, Cmd.None)
+      case NoOp => (model, Cmd.None)
       case Msg.EnteredPassword(password) =>
         (model.copy(form = model.form.copy(password = password)), Cmd.None)
       case Msg.SubmittedForm =>
         println("sumitted")
         validateForm(model.form) match {
-          case Valid(registrationData) =>
+          case Valid(loginData) =>
             (
               model,
-              Cmd.Run(UserAlg[F].register(registrationData))(_ => Msg.SubmittedForm)
+              Cmd.Run(UserAlg[F].login(loginData))(_ => Msg.SubmittedForm)
             ) // the second argument is wrong, dunno what to do just yet
           case Invalid(problems) =>
             (model.copy(problems = problems.toList), Cmd.None)
 
         }
       case Msg.GotSession(_) => (model, Cmd.None)
+
+    }
   }
 
-  def init(): Model = {
-    Model(List(), Form())
+  private def validateForm(form: Form): ValidatedNel[Problem, LoginData] = {
+    (
+      UserName.make(form.username).toValidNel(InvalidEntry(ValidatedField.Username, "Username is too short")),
+      Password.make(form.password).toValidNel(InvalidEntry(ValidatedField.Password, "Invalid password"))
+    )
+      .mapN(LoginData.apply)
+
   }
+
+  def init(): Model = Model(List(), Form("", ""))
 
   def view(model: Model): Html[Msg] = {
-    div(
-      attribute("class", "cred-page")
-    )(
+    div(attribute("class", "cred-page"))(
       div(
         attribute("class", "row")
       )(
         div(attribute("class", "col-md-6 offset-md-3 col-xs-12"))(
-          h1(attribute("class", "text-cs-center"))(text("Sign up")),
+          h1(attribute("class", "text-cs-center"))(text("Log in")),
           p(attribute("class", "text-cs-center"))(
-            a(Route.Login.href)(
-              text("Have an account?")
+            a(Route.Register.href)(
+              text("No account? Sign up")
             )
           ),
           ul(attribute("class", "error-messages"))(
@@ -77,50 +82,26 @@ object Register {
       ),
       input(
         `class`     := "form-control form-control-lg",
-        placeholder := "Email",
-        Html.onInput(EnteredEmail.apply),
-        Property("value", form.username)
-      ),
-      input(
-        `class`     := "form-control form-control-lg",
         placeholder := "Password",
         `type`      := "password",
         Html.onInput(EnteredPassword.apply),
         Property("value", form.username)
       ),
-      button(onClick(Msg.SubmittedForm))(text("Sign up"))
+      button(onClick(Msg.SubmittedForm))(text("Sign in"))
     )
-  }
-
-  private def validateForm(form: Form): ValidatedNel[Problem, RegistrationData] = {
-    (
-      UserName.make(form.username).toValidNel(InvalidEntry(ValidatedField.Username, "Username is too short")),
-      Email.make(form.email).toValidNel(InvalidEntry(ValidatedField.Email, "Invalid email")),
-      Password.make(form.password).toValidNel(InvalidEntry(ValidatedField.Password, "Invalid password"))
-    )
-      .mapN(RegistrationData.apply)
-
-  }
-
-  final case class Model(
-      problems: List[Problem],
-      form: Form
-  )
-
-  final case class Form(email: String = "", username: String = "", password: String = "") {
   }
 
   enum ValidatedField {
-    case Username, Email, Password
+    case Username
+    case Password
   }
-
+  final case class Form(username: String = "", password: String = "")
+  final case class Model(problems: List[Problem] = List(), form: Form)
   enum Msg {
     case EnteredUsername(username: String)
-    case EnteredEmail(email: String)
     case EnteredPassword(password: String)
     case SubmittedForm
     case GotSession(session: Session)
     case NoOp
   }
-
 }

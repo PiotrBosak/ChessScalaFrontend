@@ -16,11 +16,12 @@ import myorg.Msg
 import chesslogic.board.MoveType.*
 import myorg.Msg.*
 
+import scala.scalajs.js.annotation.*
 import chesslogic.board.MoveType
 import chesslogic.game.FullGame.Turn
 import myorg.SelectionState.*
 
-object ChessBoardPage {
+object ChessBoardPage extends TyrianApp[Msg, Model] {
 
   private def initModel: Model = Model(
     SelectionState.Unselected,
@@ -175,7 +176,7 @@ object ChessBoardPage {
       case (_, TileType.PossibleMove) =>
         attribute("style", "background-color: lime")
       case (White, TileType.Normal) =>
-        attribute("style", "background-color: yellow")
+        attribute("style", "background-color: white")
       case (Black, TileType.Normal) =>
         attribute("style", "background-color: black")
     td(

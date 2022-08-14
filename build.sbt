@@ -39,6 +39,7 @@ lazy val chessfronttyrian =
       descriptionColor := scala.Console.WHITE,
       libraryDependencies ++= Seq(
         "io.circe"      %%% s"circe-core"   % "0.14.2",
+        "org.http4s"    %%% s"http4s-ember-client" % "1.0.0-M35",
         "io.circe"      %%% s"circe-parser" % "0.14.2",
         "org.typelevel" %%% "kittens"       % "3.0.0-M4",
         "org.typelevel" %%% "cats-core"     % "2.7.0",

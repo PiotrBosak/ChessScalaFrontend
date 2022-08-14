@@ -26,9 +26,10 @@ object user {
       else None
   }
   final case class JwtToken(value: String)
-  final case class Profile(arg: UserName, token: JwtToken)
+  final case class Profile(userName: UserName, token: JwtToken)
 
   final case class RegistrationData(username: UserName, email: Email, password: Password)
+  final case class LoginData(username: UserName, password: Password)
 
 
 }
